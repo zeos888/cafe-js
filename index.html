@@ -3,8 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <title>Cafe JS</title>
+    <script src="js/main.js"></script>
+    <script src="bootstrap/js/jquery-3.2.0.js"></script>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <script type="application/javascript" src="bootstrap/js/bootstrap.min.js"></script>
 </head>
-<body>
+<body onload="run()">
+<!--
+<div class="dropdown">
+    <button class="btn btn-default dropdown-toggle" type="button" id="tablesMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" onclick="getTables()">
+        Select table<span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="tablesMenu" id="tables">
+
+    </ul>
+</div>
+-->
+<div class="row">
+    <div class="col-md-3">
+        <p onload="showTables()" id="tablesList">
+
+        </p>
+    </div>
+    <div class="col-md-2" id="details">
+
+    </div>
+    <div class="col-md-3" id="order">
+
+    </div>
+</div>
 </body>
-<script type="application/javascript" src="js/main.js"></script>
 </html>
