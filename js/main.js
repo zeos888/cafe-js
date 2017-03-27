@@ -165,6 +165,9 @@ Cafe = (function Cafe() {
             },
             setType: function (newType) {
                 _type = newType;
+            },
+            setQuantity: function (newQuantity) {
+                _quantity = newQuantity;
             }
         }
     };
@@ -483,7 +486,6 @@ function openDish(dishId) {
         header = "Edit dish '"+dish.getName()+"'";
     } else {
         dish = new Dish("", 0, 0, "");
-        dishId = dishes.push(dish);
         header = "Add new dish";
     }
     var area = document.getElementById("dishDetails");
@@ -491,17 +493,93 @@ function openDish(dishId) {
     var h4 = document.createElement("h4");
     h4.textContent = header;
     area.appendChild(h4);
-    var d = document.createElement("div");
-    d.setAttribute("class", "input-group input-group-sm");
+    var f = document.createElement("form");
+    f.setAttribute("class", "form-horizontal");
+    openDishSub(f, "dishType", "text", "Tip", "tip: food ili drink", dish.getType());
+    openDishSub(f, "dishName", "text", "Nazvanie", "nazvanie", dish.getName());
+    openDishSub(f, "dishPrice", "number", "Tcena", "tcena", dish.getPrice());
+    openDishSub(f, "dishQuantity", "number", "Kolichestvo", "kolichestvo", dish.getQuantity());
+    f.setAttribute("onchange", "showDishButtons("+dishId+")");
+    f.setAttribute("oninput", "showDishButtons("+dishId+")");
+    area.appendChild(f);
+    showDishButtons(dishId);
+}
+function openDishSub(form, dId, iType, label, placeholder, iValue) {
+    var d1 = document.createElement("div");
+    d1.setAttribute("class", "form-group form-group-sm");
+    var l1 = document.createElement("label");
+    l1.setAttribute("for", dId);
+    l1.setAttribute("class", "col-sm-3 control-label");
+    l1.textContent = label;
+    d1.appendChild(l1);
+    var d11 = document.createElement("div");
+    d11.setAttribute("class", "col-sm-9");
     var inp1 = document.createElement("input");
-    inp1.setAttribute("type", "text");
+    inp1.setAttribute("type", iType);
     inp1.setAttribute("class", "form-control");
-    inp1.setAttribute("placeholder", "nazvanie");
-    d.appendChild(inp1);
-    var inp2 = document.createElement("input");
-    inp2.setAttribute("type", "number");
-    inp2.setAttribute("class", "form-control");
-    inp2.setAttribute("placeholder", "nazvanie");
-    d.appendChild(inp2);
-    area.appendChild(d);
+    inp1.setAttribute("placeholder", placeholder);
+    if (iType=="number"){
+        inp1.setAttribute("min", "0");
+    } else {
+        inp1.setAttribute("pattern", "[A-Za-z0-9]{1,20}");
+    }
+    inp1.setAttribute("required", "required");
+    inp1.setAttribute("id", dId);
+    inp1.value = iValue;
+    d11.appendChild(inp1);
+    d1.appendChild(d11);
+    form.appendChild(d1);
+}
+function showDishButtons(dishId) {
+    var area = document.getElementById("dishButtons");
+    clearArea(area);
+    var bSave = document.createElement("button");
+    bSave.setAttribute("type", "button");
+    bSave.setAttribute("class", "btn btn-primary col-sm-6");
+    bSave.setAttribute("onclick", "saveDish('"+document.getElementById("dishName").value+"', "+document.getElementById("dishPrice").value+", "+document.getElementById("dishQuantity").value+", '"+document.getElementById("dishType").value+"', "+dishId+")");
+    bSave.textContent = "Save";
+    area.appendChild(bSave);
+    var bCancel = document.createElement("button");
+    bCancel.setAttribute("type", "button");
+    bCancel.setAttribute("class", "btn btn-danger col-sm-6");
+    bCancel.setAttribute("onclick", "clearDishDetails()");
+    bCancel.textContent = "Cancel";
+    area.appendChild(bCancel);
+}
+function clearDishDetails() {
+    var area = document.getElementById("dishButtons");
+    clearArea(area);
+    var area = document.getElementById("dishDetails");
+    clearArea(area);
+}
+function saveDish(dishName, dishPrice, dishQuantity, dishType, dishId) {
+    var cafe = Cafe.get();
+    var dishes = cafe.dishes;
+    var dish;
+    if (!dishName || dishName=="" || !dishType || dishType==""){
+        alert("Dish name and dish type must have values!");
+        return false;
+    }
+    if (dishId >= 0){
+        dish = dishes[dishId];
+        dish.setName(dishName);
+        dish.setPrice(dishPrice);
+        dish.setQuantity(dishQuantity);
+        dish.setType(dishType);
+    } else {
+        dish = new Dish(dishName, dishPrice, dishQuantity, dishType);
+        dishes.push(dish);
+    }
+    clearDishDetails();
+    var area = document.getElementById("dishDetails");
+    var p = document.createElement("p");
+    p.setAttribute("class", "bg-success");
+    if (dishId >= 0){
+        p.textContent = "Dish '" + dishName + "' was modified successfully!";
+    } else {
+        p.textContent = "Dish '" + dishName + "' was added successfully!";
+    }
+    area.appendChild(p);
+    showManageDishes();
+    setTimeout(function(){clearDishDetails()}, 1500);
 }

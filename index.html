@@ -23,7 +23,13 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-md-4">
+    <button class="btn btn-primary col-md-2" type="button" data-toggle="collapse" data-target="#reportArea" aria-expanded="false" aria-controls="reportArea">
+        Show orders history
+    </button>
+</div>
+<p></p>
+<div class="row collapse" id="reportArea">
+    <div class="col-md-8">
         <table class="table table-condensed table-hover">
             <caption id="totalOrders">Orders history</caption>
             <thead>
@@ -37,16 +43,29 @@
             </tbody>
         </table>
     </div>
-    <div class="col-md-2" id="ordersHistoryDetails">
+    <div class="col-md-4" id="ordersHistoryDetails">
 
     </div>
+</div>
+<div class="row">
+    <button class="btn btn-primary col-md-2" type="button" data-toggle="collapse" data-target="#managementArea" aria-expanded="false" aria-controls="managementArea">
+        Show management
+    </button>
+</div>
+<p></p>
+<div class="row collapse" id="managementArea">
     <div class="col-md-2">
         <div class="list-group" id="manageDishes">
 
         </div>
     </div>
-    <div class="col-md-3" id="dishDetails">
+    <div class="col-md-3">
+        <div class="row" id="dishDetails">
 
+        </div>
+        <div class="row" id="dishButtons">
+
+        </div>
     </div>
 </div>
 </body>
