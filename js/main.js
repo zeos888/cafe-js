@@ -156,6 +156,15 @@ Cafe = (function Cafe() {
             },
             getType: function () {
                 return _type;
+            },
+            setName: function (newName) {
+                _name = newName;
+            },
+            setPrice: function (newPrice) {
+                _price = newPrice;
+            },
+            setType: function (newType) {
+                _type = newType;
             }
         }
     };
@@ -169,38 +178,21 @@ Cafe = (function Cafe() {
     }
 })
 ();
-
 function run() {
     var cafe = Cafe.get();
     showTables();
     showOrdersHistory();
+    showManageDishes();
 }
-function getTables() {
-    var cafe = Cafe.get();
-    var area = document.getElementById("tables");
+function clearArea(area) {
     while (area.firstChild) {
         area.removeChild(area.firstChild);
     }
-    for (var i = 0; i < cafe.tables.length; i++) {
-        var table = cafe.tables[i];
-        if (table.isOccupied() == 0) {
-            var li = document.createElement("li");
-            var a = document.createElement("a");
-            a.setAttribute("onclick", "occupyTable(" + i + ")");
-            a.setAttribute("href", "#");
-            a.textContent = "table #" + table.getId() + " '" + table.getName() + "'";
-            li.appendChild(a);
-            area.appendChild(li);
-        }
-    }
-    showTables();
 }
 function showTables() {
     var cafe = Cafe.get();
     var area = document.getElementById("tablesList");
-    while (area.firstChild) {
-        area.removeChild(area.firstChild);
-    }
+    clearArea(area);
     for (var i = 0; i < cafe.tables.length; i++) {
         var table = cafe.tables[i];
         var b = document.createElement("button");
@@ -223,19 +215,21 @@ function occupyTable(tableId) {
     showTables();
     showTableDetails(tableId);
 }
-function showTableDetails(tableId) {
+function showTableDetails(tableId, clearOrderDetails) {
     var cafe = Cafe.get();
     var area = document.getElementById("details");
-    while (area.firstChild) {
-        area.removeChild(area.firstChild);
+    clearArea(area);
+    if (!clearOrderDetails){
+        var area1 = document.getElementById("order");
+        clearArea(area1);
     }
     var p = document.createElement("p");
+    p.setAttribute("id", "detailsId");
     var h5 = document.createElement("h5");
     var table = cafe.tables[tableId];
     h5.textContent = "table #" + table.getId() + " '" + table.getName() + "'";
     p.appendChild(h5);
     if (table.isOccupied() == 0) {
-        unshowArea("order");
         var bOccupy = document.createElement("button");
         bOccupy.type = "button";
         bOccupy.textContent = "Occupy table";
@@ -246,18 +240,17 @@ function showTableDetails(tableId) {
         var bOrder = document.createElement("button");
         bOrder.type = "button";
         if (!table.getOrder()) {
-            unshowArea("order");
             bOrder.textContent = "Place order";
             bOrder.setAttribute("class", "btn btn-primary");
             bOrder.setAttribute("onclick", "showOrderArea(" + tableId + ")");
             p.appendChild(bOrder);
         } else {
-            //unshowArea();
             bOrder.textContent = "Open order";
             bOrder.setAttribute("class", "btn btn-warning btn-block");
             bOrder.setAttribute("onclick", "showOrderArea(" + tableId + ")");
             p.appendChild(bOrder);
-            if (table.getOrder()) {
+            var order = table.getOrder();
+            if (order.getDishes().length){
                 var bClose = document.createElement("button");
                 bClose.type = "button";
                 bClose.textContent = "Get check";
@@ -272,9 +265,7 @@ function showTableDetails(tableId) {
 function showOrderArea(tableId) {
     var cafe = Cafe.get();
     var area = document.getElementById("order");
-    while (area.firstChild) {
-        area.removeChild(area.firstChild);
-    }
+    clearArea(area);
     var table = cafe.tables[tableId];
     if (!table.getOrder()) {
         var newOrder = new Order();
@@ -320,14 +311,12 @@ function showOrderArea(tableId) {
     h51.textContent = "Vsego " + order.getSum() + " rzhublei";
     p2.appendChild(h51);
     area.appendChild(p2);
-    showTableDetails(tableId);
+    showTableDetails(tableId, 1);
 }
 function showDishes(tableId) {
     var cafe = Cafe.get();
     var area = document.getElementById("menu");
-    while (area.firstChild) {
-        area.removeChild(area.firstChild);
-    }
+    clearArea(area);
     for (var i = 0; i < cafe.dishes.length; i++) {
         var li = document.createElement("li");
         var a = document.createElement("a");
@@ -360,23 +349,17 @@ function removeDish(tableId, dishName) {
     var order = table.getOrder();
     order.removeDish(dishName);
     showOrderArea(tableId);
-}
-function unshowArea(areaName) {
-    var area = document.getElementById(areaName);
-    while (area.firstChild) {
-        area.removeChild(area.firstChild);
-    }
+    showOrdersHistory();
 }
 function closeOrder(tableId) {
     var cafe = Cafe.get();
     var table = cafe.tables[tableId];
     var order = table.getOrder();
     var total = order.getCheck();
-    unshowArea("order");
     var area = document.getElementById("details");
-    while (area.firstChild) {
-        area.removeChild(area.firstChild);
-    }
+    clearArea(area);
+    var area1 = document.getElementById("order");
+    clearArea(area1);
     var p = document.createElement("p");
     var h5 = document.createElement("h5");
     h5.textContent = "table #" + table.getId() + " '" + table.getName() + "'";
@@ -397,23 +380,18 @@ function releaseTable(tableId) {
     var table = cafe.tables[tableId];
     table.release();
     var area = document.getElementById("details");
-    while (area.firstChild) {
-        area.removeChild(area.firstChild);
-    }
+    clearArea(area);
     showTables();
 }
 function showOrdersHistory() {
     var cafe = Cafe.get();
     var area = document.getElementById("ordersHistory");
-    while (area.firstChild) {
-        area.removeChild(area.firstChild);
-    }
-    unshowArea("ordersHistoryDetails");
+    clearArea(area);
     var sum = 0;
     for (var i = 0; i < cafe.orders.length; i++) {
         var order = cafe.orders[i];
         var r = document.createElement("tr");
-        r.setAttribute("onclick", "showOrdersHistoryDetails("+i+")");
+        r.setAttribute("onclick", "showOrdersHistoryDetails(" + i + ")");
         var rh = document.createElement("th");
         rh.setAttribute("scope", "row");
         rh.textContent = i;
@@ -425,7 +403,8 @@ function showOrdersHistory() {
         var rd2 = document.createElement("td");
         if (order.getEnd()) {
             var end = order.getEnd();
-            rd2.textContent = "done at " + end.getFullYear() + "/" + end.getMonth() + "/" + end.getDate() + " " + end.getHours() + ":" + end.getMinutes();;
+            rd2.textContent = "done at " + end.getFullYear() + "/" + end.getMonth() + "/" + end.getDate() + " " + end.getHours() + ":" + end.getMinutes();
+            ;
             r.setAttribute("class", "success");
             sum += order.getSum();
         } else {
@@ -443,21 +422,20 @@ function showOrdersHistory() {
 function showOrdersHistoryDetails(orderId) {
     var cafe = Cafe.get();
     var area = document.getElementById("ordersHistoryDetails");
-    while (area.firstChild) {
-        area.removeChild(area.firstChild);
-    }
+    clearArea(area);
     var order = cafe.orders[orderId];
     var h4 = document.createElement("h4");
-    h4.textContent = "order #"+orderId+" details:";
+    h4.textContent = "order #" + orderId + " details:";
     area.appendChild(h4);
     var h51 = document.createElement("h5");
     var start = order.getStart();
-    h51.innerHTML = "<b>Started at: </b>"+start.getFullYear() + "/" + start.getMonth() + "/" + start.getDate() + " " + start.getHours() + ":" + start.getMinutes();
+    h51.innerHTML = "<b>Started at: </b>" + start.getFullYear() + "/" + start.getMonth() + "/" + start.getDate() + " " + start.getHours() + ":" + start.getMinutes();
     area.appendChild(h51);
     var end = order.getEnd();
     var h52 = document.createElement("h5");
-    if (order.getEnd()){
-        h52.innerHTML = "<b>State: </b>done at " + end.getFullYear() + "/" + end.getMonth() + "/" + end.getDate() + " " + end.getHours() + ":" + end.getMinutes();;
+    if (order.getEnd()) {
+        h52.innerHTML = "<b>State: </b>done at " + end.getFullYear() + "/" + end.getMonth() + "/" + end.getDate() + " " + end.getHours() + ":" + end.getMinutes();
+        ;
     } else {
         h52.innerHTML = "<b>State: </b> in progress";
     }
@@ -469,8 +447,61 @@ function showOrdersHistoryDetails(orderId) {
         var li = document.createElement("li");
         li.setAttribute("class", "list-group-item");
         var dish = dishes[i];
-        li.innerHTML = "<span class=\"badge\">"+ dish.getQuantity() +"</span>"+dish.getName();
+        li.innerHTML = "<span class=\"badge\">" + dish.getQuantity() + "</span>" + dish.getName();
         ul.appendChild(li);
     }
     area.appendChild(ul);
+}
+function showManageDishes() {
+    var cafe = Cafe.get();
+    var dishes = cafe.dishes;
+    var area = document.getElementById("manageDishes");
+    clearArea(area);
+    var a0 = document.createElement("a");
+    a0.setAttribute("href", "#");
+    a0.setAttribute("class", "list-group-item active");
+    a0.textContent = "Add new dish";
+    a0.setAttribute("onclick", "openDish("+(-1)+")");
+    area.appendChild(a0);
+    for (var i=0; i<dishes.length; i++) {
+        var dish = dishes[i];
+        var a = document.createElement("a");
+        a.setAttribute("href", "#");
+        a.setAttribute("class", "list-group-item");
+        a.textContent = dish.getName();
+        a.setAttribute("onclick", "openDish(" + i + ")");
+        area.appendChild(a);
+    }
+}
+function openDish(dishId) {
+    var cafe = Cafe.get();
+    var dishes = cafe.dishes;
+    var dish;
+    var header;
+    if (dishId >= 0){
+        dish = dishes[dishId];
+        header = "Edit dish '"+dish.getName()+"'";
+    } else {
+        dish = new Dish("", 0, 0, "");
+        dishId = dishes.push(dish);
+        header = "Add new dish";
+    }
+    var area = document.getElementById("dishDetails");
+    clearArea(area);
+    var h4 = document.createElement("h4");
+    h4.textContent = header;
+    area.appendChild(h4);
+    var d = document.createElement("div");
+    d.setAttribute("class", "input-group input-group-sm");
+    var inp1 = document.createElement("input");
+    inp1.setAttribute("type", "text");
+    inp1.setAttribute("class", "form-control");
+    inp1.setAttribute("placeholder", "nazvanie");
+    d.appendChild(inp1);
+    var inp2 = document.createElement("input");
+    inp2.setAttribute("type", "number");
+    inp2.setAttribute("class", "form-control");
+    inp2.setAttribute("placeholder", "nazvanie");
+    d.appendChild(inp2);
+    area.appendChild(d);
 }
