@@ -338,7 +338,7 @@ function addDish(tableId, dishName) {
     var dish;
     for (var i = 0; i < cafe.dishes.length; i++) {
         var dish1 = cafe.dishes[i];
-        if (dish1.getName() == dishName && dish1.sell(1)) {
+        if (dish1.getName() == dishName && dish1.sell(1) >= 0) {
             dish = new Dish(dish1.getName(), dish1.getPrice(), 1, dish1.getType());
         }
     }
@@ -507,6 +507,7 @@ function openDish(dishId) {
 function openDishSub(form, dId, iType, label, placeholder, iValue) {
     var d1 = document.createElement("div");
     d1.setAttribute("class", "form-group form-group-sm");
+    d1.setAttribute("id", dId + "Div");
     var l1 = document.createElement("label");
     l1.setAttribute("for", dId);
     l1.setAttribute("class", "col-sm-3 control-label");
@@ -522,6 +523,12 @@ function openDishSub(form, dId, iType, label, placeholder, iValue) {
         inp1.setAttribute("min", "0");
     } else {
         inp1.setAttribute("pattern", "[A-Za-z0-9]{1,20}");
+        inp1.setAttribute("oninput", "validateOnChange('"+dId+"')");
+        if (!iValue){
+            d1.className = "form-group form-group-sm has-error";
+        } else {
+            d1.className = "form-group form-group-sm has-success";
+        }
     }
     inp1.setAttribute("required", "required");
     inp1.setAttribute("id", dId);
@@ -532,12 +539,21 @@ function openDishSub(form, dId, iType, label, placeholder, iValue) {
 }
 function showDishButtons(dishId) {
     var area = document.getElementById("dishButtons");
+    var b = document.getElementById("saveDish");
+    var disabled;
+    if (b && b.getAttribute("disabled") || !dishId){
+        disabled = "disabled";
+    }
     clearArea(area);
     var bSave = document.createElement("button");
     bSave.setAttribute("type", "button");
     bSave.setAttribute("class", "btn btn-primary col-sm-6");
     bSave.setAttribute("onclick", "saveDish('"+document.getElementById("dishName").value+"', "+document.getElementById("dishPrice").value+", "+document.getElementById("dishQuantity").value+", '"+document.getElementById("dishType").value+"', "+dishId+")");
+    bSave.setAttribute("id", "saveDish");
     bSave.textContent = "Save";
+    if (disabled){
+        bSave.setAttribute("disabled", "disabled");
+    }
     area.appendChild(bSave);
     var bCancel = document.createElement("button");
     bCancel.setAttribute("type", "button");
@@ -582,4 +598,16 @@ function saveDish(dishName, dishPrice, dishQuantity, dishType, dishId) {
     area.appendChild(p);
     showManageDishes();
     setTimeout(function(){clearDishDetails()}, 1500);
+}
+function validateOnChange(id) {
+    var area = document.getElementById(id+"Div");
+    var el = document.getElementById(id);
+    var s = document.getElementById("saveDish");
+    if (el.value.search(el.pattern) == -1){
+        area.className = "form-group form-group-sm has-error";
+        s.setAttribute("disabled", "disabled");
+    } else {
+        area.className = "form-group form-group-sm has-success";
+        s.removeAttribute("disabled");
+    }
 }
