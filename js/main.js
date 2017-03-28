@@ -507,7 +507,7 @@ function openDish(dishId) {
     area.appendChild(h4);
     var f = document.createElement("form");
     f.setAttribute("class", "form-horizontal");
-    openDishSub(f, "dishType", "text", "Tip", "tip: food ili drink", dish.getType());
+    openDishSubType(f, "dishType", "text", "Tip", "tip: food ili drink", dish.getType());
     openDishSub(f, "dishName", "text", "Nazvanie", "nazvanie", dish.getName());
     openDishSub(f, "dishPrice", "number", "Tcena", "tcena", dish.getPrice());
     openDishSub(f, "dishQuantity", "number", "Kolichestvo", "kolichestvo", dish.getQuantity());
@@ -515,6 +515,31 @@ function openDish(dishId) {
     f.setAttribute("oninput", "showDishButtons(" + dishId + ")");
     area.appendChild(f);
     showDishButtons(dishId);
+}
+function openDishSubType(form, dId, iType, label, placeholder, iValue) {
+    var d1 = document.createElement("div");
+    d1.setAttribute("class", "form-group form-group-sm");
+    d1.setAttribute("id", dId + "Div");
+    var l1 = document.createElement("label");
+    l1.setAttribute("for", dId);
+    l1.setAttribute("class", "col-sm-3 control-label");
+    l1.textContent = label;
+    d1.appendChild(l1);
+    var d11 = document.createElement("div");
+    d11.setAttribute("class", "col-sm-9");
+    var inp1 = document.createElement("select");
+    inp1.setAttribute("class", "form-control");
+    inp1.setAttribute("id", dId);
+    var o1 = document.createElement("option");
+    o1.textContent="food";
+    inp1.appendChild(o1);
+    var o2 = document.createElement("option");
+    o2.textContent="drink";
+    inp1.appendChild(o2);
+    inp1.value = iValue;
+    d11.appendChild(inp1);
+    d1.appendChild(d11);
+    form.appendChild(d1);
 }
 function openDishSub(form, dId, iType, label, placeholder, iValue) {
     var d1 = document.createElement("div");
@@ -560,7 +585,7 @@ function showDishButtons(dishId) {
     var bSave = document.createElement("button");
     bSave.setAttribute("type", "button");
     bSave.setAttribute("class", "btn btn-primary col-sm-6");
-    bSave.setAttribute("onclick", "saveDish('" + document.getElementById("dishName").value + "', " + document.getElementById("dishPrice").value + ", " + document.getElementById("dishQuantity").value + ", '" + document.getElementById("dishType").value + "', " + dishId + ")");
+    bSave.setAttribute("onclick", "saveDish('" + document.getElementById("dishName").value + "', " + document.getElementById("dishPrice").value + ", " + document.getElementById("dishQuantity").value + ", '" + document.getElementById("dishType").selectedOptions[0].value + "', " + dishId + ")");
     bSave.setAttribute("id", "saveDish");
     bSave.textContent = "Save";
     if (!validateOnChange("dishName") || !validateOnChange("dishType")) {
