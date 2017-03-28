@@ -40,7 +40,7 @@ Cafe = (function Cafe() {
             addDish: function (dish) {
                 if (!_end) {
                     var is = false;
-                    for (i = 0; i < _dishes.length; i++) {
+                    for (var i = 0; i < _dishes.length; i++) {
                         if (_dishes[i].getName() == dish.getName()) {
                             _dishes[i].addQuantity(dish.getQuantity());
                             is = true;
@@ -57,7 +57,7 @@ Cafe = (function Cafe() {
             getCheck: function () {
                 _end = new Date();
                 var sum = 0;
-                for (i = 0; i < _dishes.length; i++) {
+                for (var i = 0; i < _dishes.length; i++) {
                     var dish = _dishes[i];
                     sum += dish.getQuantity() * dish.getPrice();
                 }
@@ -65,7 +65,7 @@ Cafe = (function Cafe() {
             },
             getSum: function () {
                 var sum = 0;
-                for (i = 0; i < _dishes.length; i++) {
+                for (var i = 0; i < _dishes.length; i++) {
                     var dish = _dishes[i];
                     sum += dish.getQuantity() * dish.getPrice();
                 }
@@ -76,7 +76,7 @@ Cafe = (function Cafe() {
             },
             removeDish: function (name) {
                 if (!_end) {
-                    for (i = 0; i < _dishes.length; i++) {
+                    for (var i = 0; i < _dishes.length; i++) {
                         var dish = _dishes[i];
                         if (dish.getName() == name && dish.sell(1) >= 0) {
                             if (dish.getQuantity() == 0) {
@@ -222,7 +222,7 @@ function showTableDetails(tableId, clearOrderDetails) {
     var cafe = Cafe.get();
     var area = document.getElementById("details");
     clearArea(area);
-    if (!clearOrderDetails){
+    if (!clearOrderDetails) {
         var area1 = document.getElementById("order");
         clearArea(area1);
     }
@@ -253,7 +253,7 @@ function showTableDetails(tableId, clearOrderDetails) {
             bOrder.setAttribute("onclick", "showOrderArea(" + tableId + ")");
             p.appendChild(bOrder);
             var order = table.getOrder();
-            if (order.getDishes().length){
+            if (order.getDishes().length) {
                 var bClose = document.createElement("button");
                 bClose.type = "button";
                 bClose.textContent = "Get check";
@@ -326,7 +326,10 @@ function showDishes(tableId) {
         var dish = cafe.dishes[i];
         a.setAttribute("onclick", "addDish(" + tableId + ", \"" + dish.getName() + "\")");
         a.setAttribute("href", "#");
-        a.textContent = dish.getType() + " '" + dish.getName() + "'";
+        if (!dish.getQuantity()) {
+            li.setAttribute("class", "disabled");
+        }
+        a.textContent = dish.getType() + " '" + dish.getName() + "' (" + dish.getQuantity() + " left)";
         li.appendChild(a);
         area.appendChild(li);
     }
@@ -345,14 +348,23 @@ function addDish(tableId, dishName) {
     order.addDish(dish);
     showOrderArea(tableId);
     showOrdersHistory();
+    clearDishDetails();
 }
 function removeDish(tableId, dishName) {
     var cafe = Cafe.get();
     var table = cafe.tables[tableId];
     var order = table.getOrder();
     order.removeDish(dishName);
+    var dishes = cafe.dishes;
+    for (var i = 0; i < dishes.length; i++) {
+        var dish = dishes[i];
+        if (dish.getName() == dishName && dish.sell(-1) >= 0) {
+            break;
+        }
+    }
     showOrderArea(tableId);
     showOrdersHistory();
+    clearDishDetails();
 }
 function closeOrder(tableId) {
     var cafe = Cafe.get();
@@ -464,9 +476,9 @@ function showManageDishes() {
     a0.setAttribute("href", "#");
     a0.setAttribute("class", "list-group-item active");
     a0.textContent = "Add new dish";
-    a0.setAttribute("onclick", "openDish("+(-1)+")");
+    a0.setAttribute("onclick", "openDish(" + (-1) + ")");
     area.appendChild(a0);
-    for (var i=0; i<dishes.length; i++) {
+    for (var i = 0; i < dishes.length; i++) {
         var dish = dishes[i];
         var a = document.createElement("a");
         a.setAttribute("href", "#");
@@ -481,9 +493,9 @@ function openDish(dishId) {
     var dishes = cafe.dishes;
     var dish;
     var header;
-    if (dishId >= 0){
+    if (dishId >= 0) {
         dish = dishes[dishId];
-        header = "Edit dish '"+dish.getName()+"'";
+        header = "Edit dish '" + dish.getName() + "'";
     } else {
         dish = new Dish("", 0, 0, "");
         header = "Add new dish";
@@ -499,8 +511,8 @@ function openDish(dishId) {
     openDishSub(f, "dishName", "text", "Nazvanie", "nazvanie", dish.getName());
     openDishSub(f, "dishPrice", "number", "Tcena", "tcena", dish.getPrice());
     openDishSub(f, "dishQuantity", "number", "Kolichestvo", "kolichestvo", dish.getQuantity());
-    f.setAttribute("onchange", "showDishButtons("+dishId+")");
-    f.setAttribute("oninput", "showDishButtons("+dishId+")");
+    f.setAttribute("onchange", "showDishButtons(" + dishId + ")");
+    f.setAttribute("oninput", "showDishButtons(" + dishId + ")");
     area.appendChild(f);
     showDishButtons(dishId);
 }
@@ -519,12 +531,12 @@ function openDishSub(form, dId, iType, label, placeholder, iValue) {
     inp1.setAttribute("type", iType);
     inp1.setAttribute("class", "form-control");
     inp1.setAttribute("placeholder", placeholder);
-    if (iType=="number"){
+    if (iType == "number") {
         inp1.setAttribute("min", "0");
     } else {
         inp1.setAttribute("pattern", "[A-Za-z0-9]{1,20}");
-        inp1.setAttribute("oninput", "validateOnChange('"+dId+"')");
-        if (!iValue){
+        inp1.setAttribute("oninput", "validateOnChange('" + dId + "')");
+        if (!iValue) {
             d1.className = "form-group form-group-sm has-error";
         } else {
             d1.className = "form-group form-group-sm has-success";
@@ -541,17 +553,17 @@ function showDishButtons(dishId) {
     var area = document.getElementById("dishButtons");
     var b = document.getElementById("saveDish");
     var disabled;
-    if (b && b.getAttribute("disabled") || !dishId){
+    if (b && b.getAttribute("disabled") || dishId < 0) {
         disabled = "disabled";
     }
     clearArea(area);
     var bSave = document.createElement("button");
     bSave.setAttribute("type", "button");
     bSave.setAttribute("class", "btn btn-primary col-sm-6");
-    bSave.setAttribute("onclick", "saveDish('"+document.getElementById("dishName").value+"', "+document.getElementById("dishPrice").value+", "+document.getElementById("dishQuantity").value+", '"+document.getElementById("dishType").value+"', "+dishId+")");
+    bSave.setAttribute("onclick", "saveDish('" + document.getElementById("dishName").value + "', " + document.getElementById("dishPrice").value + ", " + document.getElementById("dishQuantity").value + ", '" + document.getElementById("dishType").value + "', " + dishId + ")");
     bSave.setAttribute("id", "saveDish");
     bSave.textContent = "Save";
-    if (disabled){
+    if (!validateOnChange("dishName") || !validateOnChange("dishType")) {
         bSave.setAttribute("disabled", "disabled");
     }
     area.appendChild(bSave);
@@ -572,11 +584,11 @@ function saveDish(dishName, dishPrice, dishQuantity, dishType, dishId) {
     var cafe = Cafe.get();
     var dishes = cafe.dishes;
     var dish;
-    if (!dishName || dishName=="" || !dishType || dishType==""){
+    if (!dishName || dishName == "" || !dishType || dishType == "") {
         alert("Dish name and dish type must have values!");
         return false;
     }
-    if (dishId >= 0){
+    if (dishId >= 0) {
         dish = dishes[dishId];
         dish.setName(dishName);
         dish.setPrice(dishPrice);
@@ -590,24 +602,32 @@ function saveDish(dishName, dishPrice, dishQuantity, dishType, dishId) {
     var area = document.getElementById("dishDetails");
     var p = document.createElement("p");
     p.setAttribute("class", "bg-success");
-    if (dishId >= 0){
+    if (dishId >= 0) {
         p.textContent = "Dish '" + dishName + "' was modified successfully!";
     } else {
         p.textContent = "Dish '" + dishName + "' was added successfully!";
     }
     area.appendChild(p);
     showManageDishes();
-    setTimeout(function(){clearDishDetails()}, 1500);
+    setTimeout(function () {
+        clearDishDetails()
+    }, 1500);
 }
 function validateOnChange(id) {
-    var area = document.getElementById(id+"Div");
+    var area = document.getElementById(id + "Div");
     var el = document.getElementById(id);
     var s = document.getElementById("saveDish");
-    if (el.value.search(el.pattern) == -1){
+    if (el.value.search(el.pattern) == -1) {
         area.className = "form-group form-group-sm has-error";
-        s.setAttribute("disabled", "disabled");
+        if (s) {
+            s.setAttribute("disabled", "disabled");
+        }
+        return false;
     } else {
         area.className = "form-group form-group-sm has-success";
-        s.removeAttribute("disabled");
+        if (s) {
+            s.removeAttribute("disabled");
+        }
+        return true;
     }
 }
