@@ -345,7 +345,9 @@ function addDish(tableId, dishName) {
             dish = new Dish(dish1.getName(), dish1.getPrice(), 1, dish1.getType());
         }
     }
-    order.addDish(dish);
+    if (dish){
+        order.addDish(dish);
+    }
     showOrderArea(tableId);
     showOrdersHistory();
     clearDishDetails();
